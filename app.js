@@ -1,19 +1,17 @@
 // Declaring what dependency I want.
 const express = require("express");
 const app = express()
-const PORT = 3000;
+const PORT = 7000;
 const middleware = require("./middleware")
 const path = require("path")
-
-// Telling express to listen to port 3000.
-const server = app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`)
-})
+const bodyParser = require("body-parser")
+const mongoose = require("./database")
 
 app.set("view engine", "pug")
 // When you need views, go to folder namned views.
 app.set("views", "views")
 
+app.use(bodyParser.urlencoded({ extended: false}))
 // If something might change in the path this is the safer way to write. 
 app.use(express.static(path.join(__dirname, "public")))
 
@@ -34,4 +32,10 @@ app.get("/", middleware.requireLogin, (req, res, next) => {
     // Render function takes two parameters.
     // 1. template/page 'home' 2. The payload with the data we want to send to it.
     res.status(200).render("home", payload)
+})
+
+
+// Telling express to listen to port 3000.
+const server = app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`)
 })

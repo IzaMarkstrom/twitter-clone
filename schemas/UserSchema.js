@@ -6,7 +6,9 @@ const UserSchema = new Schema({
     username: {type: String, require: true, trim: true, unique: true},
     password: {type: String, require: true},
     profilePic: {type: String, defualt: "/images/profilePic.png"}
-})
+}, { timestamps: true })
+// This will give a timestamp on every document inserted in this collection.
+
 
 const User = mongoose.model("User", UserSchema)
 module.exports = User

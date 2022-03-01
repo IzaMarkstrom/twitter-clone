@@ -35,7 +35,8 @@ app.use("/register", registerRoute)
 app.get("/", middleware.requireLogin, (req, res, next) => {
 
     const payload = {
-        pageTitle: "Twitter clone"
+        pageTitle: "Twitter clone", 
+        userLoggedIn: req.session.user
     }
 
     // Render function takes two parameters.

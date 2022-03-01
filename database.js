@@ -8,7 +8,7 @@ class Database {
     }
 
     connect() {
-        mongoose.connect("mongodb://127.0.0.1/backend1")
+        mongoose.connect("mongodb://127.0.0.1/twitter-test")
         .then(() => {
             console.log("Database connection successful")
         })

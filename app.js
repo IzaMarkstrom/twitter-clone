@@ -6,6 +6,7 @@ const middleware = require("./middleware")
 const path = require("path")
 const bodyParser = require("body-parser")
 const mongoose = require("./database")
+const session = require("express-session")
 
 app.set("view engine", "pug")
 // When you need views, go to folder namned views.
@@ -14,6 +15,14 @@ app.set("views", "views")
 app.use(bodyParser.urlencoded({ extended: false}))
 // If something might change in the path this is the safer way to write. 
 app.use(express.static(path.join(__dirname, "public")))
+
+app.use(session({
+    // We pass in a String and it hashes the session with it. 
+    secret: "oboy",
+    resave: true,
+    // The reasoning behind this is that this will prevent a lot of empty session objects being stored in the session store. 
+    saveUninitialized: false
+}))
 
 // Routes
 const loginRoute = require("./routes/loginRoutes")

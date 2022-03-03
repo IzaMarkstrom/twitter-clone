@@ -1,7 +1,7 @@
 // Declaring what dependency I want.
 const express = require("express");
 const app = express()
-const PORT = 7000;
+const PORT = 3006;
 const middleware = require("./middleware")
 const path = require("path")
 const bodyParser = require("body-parser")
@@ -27,9 +27,11 @@ app.use(session({
 // Routes
 const loginRoute = require("./routes/loginRoutes")
 const registerRoute = require("./routes/registerRoutes")
+const logoutRoute = require("./routes/logoutRoutes")
 
 app.use("/login", loginRoute)
 app.use("/register", registerRoute)
+app.use("/logout", logoutRoute)
 
 // Adding req = request from client and res = response from server parameter.
 app.get("/", middleware.requireLogin, (req, res, next) => {

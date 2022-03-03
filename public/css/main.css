@@ -1,0 +1,114 @@
+:root {
+    --blue: #00ACEE;
+    --blueLight: #41c3f7;
+    --borderColor: rgb(209, 209, 209);
+    --spacing: 20px;
+}
+
+* {
+    outline: none !important;
+}
+
+/* Skapar en variabel som går att kalla på via var(--blue) istället för att behöva byta färg överallt */
+
+a {
+    color: rgb(31, 31, 31);
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    height: 100%;
+}
+
+nav a {
+    padding: 10px;
+    font-size: 30px;
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+nav a:hover {
+    background-color: rgb(236, 236, 236);
+    color: var(--blue);
+    border-radius: 50%;
+}
+
+nav a.blue {
+    color: var(--blue)
+}
+
+.mainSectionContainer {
+    padding: 0;
+    border-left: 1px solid var(--borderColor);
+    border-right: 1px solid var(--borderColor);
+    display: flex;
+    flex-direction: column;
+}
+
+.titleContainer {
+    height: 50px;
+    padding: 0 var(--spacing);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--borderColor);
+    flex-shrink: 0;
+}
+
+.titleContainer h1 {
+    flex: 1;
+}
+
+.postFormContainer {
+    display: flex;
+    padding: var(--spacing);
+    border-bottom: 10px solid var(--borderColor);
+}
+
+.userImageContainer {
+    width: 50px;
+    height: 50px;
+}
+
+.userImageContainer img{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /* In case user insert a png picture without a background */
+    background-color: white;
+}
+
+.textareaContainer {
+    flex: 1;
+    padding-left: var(--spacing)
+}
+
+.textareaContainer textarea {
+    width: 100%;
+    border: none;
+    resize: none;
+    font-size: 20px;
+}
+
+#submitPostBtn {
+    background-color: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 7px 15px
+}
+
+#submitPostBtn:disabled {
+    background-color: var(--blueLight);
+}

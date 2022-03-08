@@ -3,11 +3,18 @@
     --blueLight: #6acdf5;
     --borderColor: rgb(209, 209, 209);
     --spacing: 20px;
+    --UserPost: rgb(167, 167, 167);
 }
 
 * {
     outline: none !important;
 }
+
+button {
+    background-color: transparent;
+    border: none;
+}
+
 
 /* Skapar en variabel som går att kalla på via var(--blue) istället för att behöva byta färg överallt */
 
@@ -111,4 +118,39 @@ nav a.blue {
 
 #submitPostBtn:disabled {
     background-color: var(--blueLight);
+}
+
+.post {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing);
+    cursor: pointer;
+    border-bottom: 1px solid var(--borderColor);
+    flex-shrink: 0;
+}
+
+.mainContainer {
+    flex: 1;
+    display: flex;
+}
+
+.postContentContainer {
+    padding-left: var(--spacing);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.username
+.date {
+    color: var(--UserPost);
+}
+
+.postFooter {
+    display: flex;
+    justify-content: space-around;
+}
+
+.postFooter button {
+
 }

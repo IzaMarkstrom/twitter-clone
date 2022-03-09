@@ -1,6 +1,7 @@
 :root {
     --blue: #00ACEE;
     --blueLight: #6acdf5;
+    --blueBackground: #00abee36;
     --borderColor: rgb(209, 209, 209);
     --spacing: 20px;
     --UserPost: rgb(167, 167, 167);
@@ -15,6 +16,10 @@ button {
     border: none;
 }
 
+button i, 
+button span {
+    pointer-events: none;
+}
 
 /* Skapar en variabel som går att kalla på via var(--blue) istället för att behöva byta färg överallt */
 
@@ -151,6 +156,101 @@ nav a.blue {
     justify-content: space-around;
 }
 
-.postFooter button {
+.postBtnContainer.red button.active {
+    color: red
+}
 
+.profileHeaderContainer .coverPhotoContainer{
+    height: 180px;
+    background-color: var(--blue);
+    position: relative;
+}
+
+.profileHeaderContainer .userImageContainer {
+    height: 132px;
+    width: 132px;
+    margin-left: var(--spacing);
+    position: absolute;
+    bottom: -66px;
+}
+
+.profileHeaderContainer .userImageContainer img{
+    border: 4px solid white
+}
+
+.profileHeaderContainer .profileButtonContainer{
+    text-align: right;
+    padding: var(--spacing);
+    min-height: 66px;
+}
+
+.profileButton, 
+.followButton {
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 50px;
+    display: inline-block;
+    margin-left: var(--spacing);
+}
+
+.profileButton:hover,
+.followButton:hover {
+background-color: var(--blueBackground);
+}
+
+.followButton.following {
+    background-color: var(--blue);
+    color: white;
+}
+
+.profileHeaderContainer .userDetailsContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--spacing);
+}
+
+.followersContainer .value{
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.followersContainer span:not(.value){
+    color: grey;
+}
+
+.followersContainer a{
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+.followersContainer a:hover{
+    border-bottom: 1px solid black;
+}
+
+.tabsContainer {
+    display: flex;
+    border-bottom: 1px solid var(--borderColor);
+}
+
+.tab {
+    /* Splits the width equal between the two tabs  */
+    flex: 1;
+    height: 52px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: grey;
+    font-weight: bold;
+}
+
+.tab.active {
+    color: var(--blue);
+    border-bottom: 2px solid var(--blue);
+}
+
+.tab:hover {
+    color: var(--blue);
+    background-color: var(--blueBackground);
 }

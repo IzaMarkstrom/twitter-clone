@@ -22,9 +22,10 @@ $("#submitPostBtn").click(() => {
     var data = {
         content: textbox.val()
     }
-   // Sending the data to the url and adding a callback function.
+    
+    // Sending the data to the url and adding a callback function.
     $.post("/api/posts", data, postData => {
-        
+
         var html = createPostHtml(postData);
         $(".postContainer").prepend(html);
         textbox.val("");
@@ -32,18 +33,90 @@ $("#submitPostBtn").click(() => {
     })
 })
 
+
+
+// Since the heart btn is dynamic content, it doesn't load until the page is ready.
+// Which means that the time this code execute, the btns are not on the page.
+$(document).on("click", ".likeBtn", (event) => {
+    var button = $(event.target)
+    var postId = getPostId(button)
+    
+    if(postId === undefined) return
+
+    // Since we can't write $.put in ajax.
+    $.ajax({
+        url: `/api/posts/${postId}/like`, 
+        type: "PUT",
+        success: (postData) => {
+            
+            button.find("span").text(postData.likes.length || "")
+
+            if(postData.likes.includes(userLoggedIn._id)){
+                button.addClass("active")
+            } else {
+                button.removeClass("active")
+            }
+        }
+    })
+})
+
+$(document).on("click", ".retweetBtn", (event) => {
+    var button = $(event.target)
+    var postId = getPostId(button)
+    
+    if(postId === undefined) return
+
+    // Since we can't write $.put in ajax.
+    $.ajax({
+        url: `/api/posts/${postId}/retweet`, 
+        type: "POST",
+        success: (postData) => {
+            
+            console.log(postData)
+            // button.find("span").text(postData.likes.length || "")
+
+            // if(postData.likes.includes(userLoggedIn._id)){
+            //     button.addClass("active")
+            // } else {
+            //     button.removeClass("active")
+            // }
+        }
+    })
+})
+
+$(document).on("click", ".post", (event) => {
+    var element = $(event.target)
+    var postId = getPostId(element)
+
+    if(postId !== undefined && !element.is("button")){
+        window.location.href = "/posts/" + postId
+    }
+})
+
+
+function getPostId(element) {
+    var isRoot = element.hasClass("post")
+    // .closest is a jquery function that goes up through the DOM three to find a parent with this class. 
+    var rootElement = isRoot ? element : element.closest(".post")
+    var postId = rootElement.data().id
+
+    if(postId === undefined) return alert("Post id is undefined")    
+
+    return postId
+}
+
 function createPostHtml(postData) {
 
-    var postedBy = postData.postedBy
+    var postedBy = postData.postedBy;
 
-    if(postedBy._id === undefined){
-        return console.log("User object not populated.")
+    if(postedBy._id === undefined) {
+        return console.log("User object not populated");
     }
 
     var displayName = postedBy.username
     var timestamp = timeDifference(new Date(), new Date(postData.createdAt))
 
-    return `<div class="post">
+    return `<div class="post" data-id="${postData._id}">
                 <div class="mainContainer">
                     <div class="userImageContainer">
                         <img src="${postedBy.profilePic}">
@@ -57,19 +130,20 @@ function createPostHtml(postData) {
                             <span>${postData.textContent}</span>
                         </div>
                         <div class="postFooter">
-                            <div>
+                            <div class="postBtnContainer">
                                 <button>
                                     <i class="fa-solid fa-comment"></i>
                                 </button>
                             </div>
-                            <div>
-                                <button>
+                            <div class="postBtnContainer green">
+                                <button class="retweetBtn">
                                     <i class="fa-solid fa-retweet"></i>
                                 </button>
                             </div>
-                            <div>
-                                <button>
+                            <div class="postBtnContainer red">
+                                <button class="likeBtn">
                                     <i class="fa-solid fa-heart"></i>
+                                    <span>${postData.likes.length || ""}</span>
                                 </button>
                             </div>
                         </div>
@@ -112,5 +186,22 @@ function timeDifference(current, previous) {
 
     else {
         return Math.round(elapsed/msPerYear ) + ' years ago';   
+    }
+}
+
+function outputPosts(results, container) {
+    container.html("");
+
+    if(!Array.isArray(results)) {
+        results = [results];
+    }
+
+    results.forEach(result => {
+        var html = createPostHtml(result)
+        container.append(html);
+    });
+
+    if (results.length == 0) {
+        container.append("<span class='noResults'>Nothing to show.</span>")
     }
 }

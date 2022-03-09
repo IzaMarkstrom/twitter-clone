@@ -9,9 +9,11 @@ app.use(bodyParser.urlencoded({ extended: false}))
 
 
 
-router.get("/", (req, res, next) => {
+router.get("/", async (req, res, next) => {
+
     Post.find()
     .populate("postedBy")
+    .sort({"createdAt": -1})
     .then(results => res.status(200).send(results))
     .catch(error => {
         console.log(error)
@@ -19,6 +21,19 @@ router.get("/", (req, res, next) => {
     })
 })
 
+router.get("/:id", (req, res, next) => {
+
+    var id = req.params.id
+
+    Post.findById(id)
+    .populate("postedBy")
+    .sort({"createdAt": -1})
+    .then(results => res.status(200).send(results))
+    .catch(error => {
+        console.log(error)
+        res.sendStatus(400)
+    })
+})
 
 router.post("/", async (req, res, next) => {
 
@@ -45,6 +60,34 @@ router.post("/", async (req, res, next) => {
         res.sendStatus(400)
     })
 })
+
+router.put("/:id/like", async (req, res, next) => {
+
+    var postId = req.params.id
+    var userId = req.session.user._id
+
+    // Checking if they have a likes array already.
+    var isLiked = req.session.user.likes && req.session.user.likes.includes(postId)
+
+    var option = isLiked ? "$pull" : "$addToSet"
+
+    // Insert user like
+    req.session.user = await User.findByIdAndUpdate(userId, { [option]: {likes: postId} }, {new: true})
+    .catch(error => {
+        console.log(error)
+        res.sendStatus(400)
+    })
+
+    // Insert post like
+    var post = await Post.findByIdAndUpdate(postId, { [option]: {likes: postId} }, {new: true})
+    .catch(error => {
+        console.log(error)
+        res.sendStatus(400)
+    })
+
+    res.status(200).send(post)
+})
+
 
 // Export it so we can use this file in other places.
 module.exports = router

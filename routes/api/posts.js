@@ -11,32 +11,44 @@ app.use(bodyParser.urlencoded({ extended: false}))
 
 router.get("/", async (req, res, next) => {
 
-    Post.find()
-    .populate("postedBy")
-    .sort({"createdAt": -1})
-    .then(results => res.status(200).send(results))
-    .catch(error => {
-        console.log(error)
-        res.sendStatus(400)
-    })
+    var searchObject = req.query
+
+    if(searchObject.isReply !== undefined) {
+        var isReply = searchObject.isReply == "true"
+        // Using the mongoDB operator to check if replyTo exist for the post.
+        searchObject.replyTo = { $exists: isReply }
+        delete searchObject.isReply
+        console.log(searchObject)
+    }
+
+    var results = await getPosts(searchObject)
+    res.status(200).send(results)
 })
 
-router.get("/:id", (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
 
-    var id = req.params.id
+    var postId = req.params.id
 
-    Post.findById(id)
-    .populate("postedBy")
-    .sort({"createdAt": -1})
-    .then(results => res.status(200).send(results))
-    .catch(error => {
-        console.log(error)
-        res.sendStatus(400)
-    })
+    var postData = await getPosts({ _id: postId })
+    // We know we only ever want one since it is one ID and getPosts function search is
+    // by find() and not findOne().
+    postData = postData[0]
+
+    var results = {
+        postData: postData
+    }
+    
+    if(postData.replyTo !== undefined) {
+        results.replyTo = postData.replyTo
+    }
+
+    // Checks if the post has a replyTo and matches the postId.
+    results.replies = await getPosts({ replyTo: postId })
+
+    res.status(200).send(results)
 })
 
 router.post("/", async (req, res, next) => {
-
     if(!req.body.content){
         console.log("Content param not sent with request")
         return res.sendStatus(400)
@@ -46,6 +58,10 @@ router.post("/", async (req, res, next) => {
     var postData = {
         textContent: req.body.content,
         postedBy: req.session.user
+    }
+
+    if(req.body.replyTo){
+        postData.replyTo = req.body.replyTo
     }
 
     // This create function returns a promise.
@@ -88,6 +104,59 @@ router.put("/:id/like", async (req, res, next) => {
     res.status(200).send(post)
 })
 
+router.post("/:id/retweet", async (req, res, next) => {
+    var postId = req.params.id;
+    var userId = req.session.user._id;
+
+    // Try and delete retweet
+    var deletedPost = await Post.findOneAndDelete({ postedBy: userId, retweetData: postId })
+    .catch(error => {
+        console.log(error);
+        res.sendStatus(400);
+    })
+
+    var option = deletedPost != null ? "$pull" : "$addToSet";
+
+    var repost = deletedPost;
+
+    if (repost == null) {
+        repost = await Post.create({ postedBy: userId, retweetData: postId })
+        .catch(error => {
+            console.log(error);
+            res.sendStatus(400);
+        })
+    }
+
+    // This will either add the repost itself to the users list of retweet or remove it depending on 
+    // what is in the option variable, which is decided above.
+    req.session.user = await User.findByIdAndUpdate(userId, { [option]: { retweets: repost._id } }, { new: true })
+    .catch(error => {
+        console.log(error);
+        res.sendStatus(400);
+    })
+
+    // Insert post like
+    var post = await Post.findByIdAndUpdate(postId, { [option]: { retweetUsers: userId } }, { new: true })
+    .catch(error => {
+        console.log(error);
+        res.sendStatus(400);
+    })
+
+
+    res.status(200).send(post)
+})
+
+async function getPosts(filter) {
+    var results = await Post.find(filter)
+    .populate("postedBy")
+    .populate("retweetData")
+    .populate("replyTo")
+    .sort({"createdAt": -1})
+    .catch(error => console.log(error))
+
+    results = await User.populate(results, {path: "replyTo.postedBy"})
+    return await User.populate(results, {path: "retweetData.postedBy"})
+}
 
 // Export it so we can use this file in other places.
 module.exports = router

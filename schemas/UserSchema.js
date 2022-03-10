@@ -6,7 +6,8 @@ const UserSchema = new Schema({
     username: {type: String, require: true, trim: true, unique: true},
     password: {type: String, require: true},
     profilePic: {type: String, default: "/images/profilePic.jpg"},
-    likes: [{ type: Schema.Types.ObjectId, ref: "Post" }]
+    likes: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+    retweets: [{ type: Schema.Types.ObjectId, ref: "Post" }]
 }, { timestamps: true })
 // This will give a timestamp on every document inserted in this collection.
 

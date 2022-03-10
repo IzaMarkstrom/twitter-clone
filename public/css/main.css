@@ -88,6 +88,17 @@ nav a.blue {
     border-bottom: 10px solid var(--borderColor);
 }
 
+.modal .postFormContainer {
+    border: none;
+    padding: 0;
+    padding-top: var(--spacing);
+}
+
+.modal .post {
+    padding: 0;
+    padding-bottom: var(--spacing);
+}
+
 .userImageContainer {
     width: 50px;
     height: 50px;
@@ -157,7 +168,31 @@ nav a.blue {
 }
 
 .postBtnContainer.red button.active {
-    color: red
+    color: rgb(204, 16, 41)
+}
+
+.postBtnContainer.red button:hover {
+    color: rgb(226, 55, 78);
+    background-color: rgba(216, 79, 79, 0.219);
+    border-radius: 50px;
+}
+
+.postBtnContainer.green button:hover {
+    color: rgb(102, 196, 59);
+    background-color: rgba(83, 223, 83, 0.219);
+    border-radius: 50px;
+}
+
+.postBtnContainer.red button:hover {
+    color: rgb(226, 55, 78);
+    background-color: rgba(255, 0, 0, 0.219);
+    border-radius: 50px;
+}
+
+.postBtnContainer button:hover {
+    background-color: #d4edff;
+    color: var(--blue);
+    border-radius: 50%;
 }
 
 .profileHeaderContainer .coverPhotoContainer{
@@ -253,4 +288,21 @@ background-color: var(--blueBackground);
 .tab:hover {
     color: var(--blue);
     background-color: var(--blueBackground);
+}
+
+.postActionContainer {
+    padding-left: 35px;
+    font-size: 15px;
+    color: grey;
+    margin-bottom: 5px;
+}
+
+.replyFlag {
+    margin-bottom: 5px;
+    font-size: 15px;
+    color: grey;
+}
+
+.replyFlag a {
+    color: var(--blue);
 }

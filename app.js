@@ -25,23 +25,28 @@ app.use(session({
 }))
 
 // Routes
-const loginRoute = require("./routes/loginRoutes")
-const registerRoute = require("./routes/registerRoutes")
+const loginRoute = require('./routes/loginRoutes');
+const registerRoute = require('./routes/registerRoutes');
+const postRoute = require('./routes/postRoutes');
+const profileRoute = require('./routes/profileRoutes');
 
-// API routes
-const postApiRoute = require("./routes/api/posts")
+// Api routes
+const postsApiRoute = require('./routes/api/posts');
 
+app.use("/login", loginRoute);
+app.use("/register", registerRoute);
+app.use("/posts", middleware.requireLogin, postRoute);
+app.use("/profile", middleware.requireLogin, profileRoute);
 
-app.use("/login", loginRoute)
-app.use("/register", registerRoute)
-app.use("/api/posts", postApiRoute)
+app.use("/api/posts", postsApiRoute);
 
 // Adding req = request from client and res = response from server parameter.
 app.get("/", middleware.requireLogin, (req, res, next) => {
 
     const payload = {
         pageTitle: "Twitter clone", 
-        userLoggedIn: req.session.user
+        userLoggedIn: req.session.user,
+        userLoggedInJs: JSON.stringify(req.session.user)
     }
 
     // Render function takes two parameters.

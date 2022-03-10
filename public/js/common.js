@@ -1,10 +1,15 @@
 // Function to enable and disabled the POST button. 
-$("#postTextarea").keyup(event => {
+$("#postTextarea, #replyTextarea").keyup(event => {
     var textbox = $(event.target)
     // Trim the value so the user is not able to print a post with only spaces.
     var value = textbox.val().trim()
 
-    var submitBtn = $("#submitPostBtn")
+    // This will be true or false wether we are in a modal or not.
+    var isModal = textbox.parents(".modal").length == 1
+
+    // Choses which btn to highlight depending on if we write in the home post container or
+    // in the reply post container.
+    var submitBtn = isModal ? $("#submitReplyButton") : $("#submitPostBtn")
 
     if(submitBtn.length == 0) return alert("No submit button found")
 
@@ -15,25 +20,53 @@ $("#postTextarea").keyup(event => {
     submitBtn.prop("disabled", false)
 })
 
-$("#submitPostBtn").click(() => {
+$("#submitPostBtn, #submitReplyButton").click(() => {
     var button = $(event.target)
-    var textbox = $("#postTextarea")
+
+    var isModal = button.parents(".modal").length == 1
+    var textbox = isModal ? $("#replyTextarea") : $("#postTextarea");
 
     var data = {
         content: textbox.val()
     }
     
+    if (isModal) {
+        var id = button.data().id;
+        if(id == null) return alert("Button id is null");
+        data.replyTo = id;
+    }
+
     // Sending the data to the url and adding a callback function.
     $.post("/api/posts", data, postData => {
 
-        var html = createPostHtml(postData);
-        $(".postContainer").prepend(html);
-        textbox.val("");
-        button.prop("disabled", true);
+        if(postData.replyTo) {
+            location.reload();
+        } else {
+            var html = createPostHtml(postData);
+            $(".postsContainer").prepend(html);
+            textbox.val("");
+            button.prop("disabled", true);
+        }
     })
 })
 
+// Checking if modal is open using a built in bootstrap event.
+// Then adding the post we want to reply to inside. 
+$("#replyModal").on("show.bs.modal", (event) => {
+    var button = $(event.relatedTarget)
+    var postId = getPostId(button)
+    $("#submitReplyButton").data("id", postId)
 
+    $.get(`/api/posts/${postId}`, results => {
+        outputPosts(results.postData, $("#originalPostContainer") )
+    })
+
+})
+
+// Removing the recently opened modals text, only shown with slow internet connection.
+$("#replyModal").on("hidden.bs.modal", () => {
+    $("#originalPostContainer").html("")
+})
 
 // Since the heart btn is dynamic content, it doesn't load until the page is ready.
 // Which means that the time this code execute, the btns are not on the page.
@@ -71,18 +104,18 @@ $(document).on("click", ".retweetBtn", (event) => {
         url: `/api/posts/${postId}/retweet`, 
         type: "POST",
         success: (postData) => {
-            
-            console.log(postData)
-            // button.find("span").text(postData.likes.length || "")
 
-            // if(postData.likes.includes(userLoggedIn._id)){
-            //     button.addClass("active")
-            // } else {
-            //     button.removeClass("active")
-            // }
+            button.find("span").text(postData.retweetUsers.length || "")
+
+            if(postData.retweetUsers.includes(userLoggedIn._id)){
+                button.addClass("active")
+            } else {
+                button.removeClass("active")
+            }
         }
     })
 })
+
 
 $(document).on("click", ".post", (event) => {
     var element = $(event.target)
@@ -107,6 +140,12 @@ function getPostId(element) {
 
 function createPostHtml(postData) {
 
+    if(postData == null) return alert("post object is null");
+
+    var isRetweet = postData.retweetData !== undefined;
+    var retweetedBy = isRetweet ? postData.postedBy.username : null;
+    postData = isRetweet ? postData.retweetData : postData;
+    
     var postedBy = postData.postedBy;
 
     if(postedBy._id === undefined) {
@@ -116,7 +155,35 @@ function createPostHtml(postData) {
     var displayName = postedBy.username
     var timestamp = timeDifference(new Date(), new Date(postData.createdAt))
 
+    var retweetText = ""
+    if(isRetweet){
+        retweetText = `<span>
+                        <i class="fa-solid fa-retweet"></i>
+                        Retweeted by <a href=${retweetedBy}>@${retweetedBy}</a>
+                    </span>`
+    }
+
+    var replyFlag = "";
+    if(postData.replyTo && postData.replyTo._id) {
+        
+        if(!postData.replyTo._id) {
+            return alert("Reply to is not populated");
+        }
+        else if(!postData.replyTo.postedBy._id) {
+            return alert("Posted by is not populated");
+        }
+
+        var replyToUsername = postData.replyTo.postedBy.username;
+        replyFlag = `<div class='replyFlag'>
+                        Replying to <a href='/profile/${replyToUsername}'>@${replyToUsername}<a>
+                    </div>`;
+
+    }
+
     return `<div class="post" data-id="${postData._id}">
+                <div class="postActionContainer">
+                    ${retweetText}
+                </div>
                 <div class="mainContainer">
                     <div class="userImageContainer">
                         <img src="${postedBy.profilePic}">
@@ -126,23 +193,25 @@ function createPostHtml(postData) {
                             <a href="/profile/${postedBy.username}">${displayName}</a>
                             <span class="date">${timestamp}</span>
                         </div>
+                        ${replyFlag}
                         <div class="postBody">
                             <span>${postData.textContent}</span>
                         </div>
                         <div class="postFooter">
-                            <div class="postBtnContainer">
-                                <button>
-                                    <i class="fa-solid fa-comment"></i>
+                            <div class='postBtnContainer'>
+                                <button data-bs-toggle='modal' data-bs-target='#replyModal'>
+                                    <i class='far fa-comment'></i>
                                 </button>
                             </div>
                             <div class="postBtnContainer green">
                                 <button class="retweetBtn">
                                     <i class="fa-solid fa-retweet"></i>
+                                    <span>${postData.retweetUsers.length || ""}</span>
                                 </button>
                             </div>
                             <div class="postBtnContainer red">
                                 <button class="likeBtn">
-                                    <i class="fa-solid fa-heart"></i>
+                                    <i class="far fa-heart"></i>
                                     <span>${postData.likes.length || ""}</span>
                                 </button>
                             </div>
@@ -197,6 +266,27 @@ function outputPosts(results, container) {
     }
 
     results.forEach(result => {
+        var html = createPostHtml(result)
+        container.append(html);
+    });
+
+    if (results.length == 0) {
+        container.append("<span class='noResults'>Nothing to show.</span>")
+    }
+}
+
+function outputPostsWithReplies(results, container) {
+    container.html("");
+
+    if(results.replyTo !== undefined && results.replyTo._id !== undefined) {
+        var html = createPostHtml(results.replyTo)
+        container.append(html);
+    }
+
+    var mainPostHtml = createPostHtml(results.postData)
+    container.append(mainPostHtml);
+
+    results.replies.forEach(result => {
         var html = createPostHtml(result)
         container.append(html);
     });

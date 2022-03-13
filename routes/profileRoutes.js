@@ -8,7 +8,7 @@ const User = require("../schemas/UserSchema")
 router.get("/", (req, res, next) => {
 
     var payload = {
-        pageTitle: req.session.user.username,
+        pageTitle: req.session.user.username + "'s profile",
         userLoggedIn: req.session.user,
         userLoggedInJs: JSON.stringify(req.session.user),
         profileUser: req.session.user

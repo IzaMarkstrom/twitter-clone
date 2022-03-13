@@ -26,7 +26,6 @@ mixin createReplyModal(userLoggedIn)
                     button.btn.btn-secondary(type='button', data-bs-dismiss='modal') Close
                     button#submitReplyButton.btn.btn-primary(type='button', class="modalBtn", disabled="") Reply
 
-
 mixin createFollowButton(user, isFollowing)
     //- with a - is how you create a variable in PUG
     - text = isFollowing ? "Following" : "Follow"

@@ -18,7 +18,42 @@ router.get("/", async (req, res, next) => {
         // Using the mongoDB operator to check if replyTo exist for the post.
         searchObject.replyTo = { $exists: isReply }
         delete searchObject.isReply
-        console.log(searchObject)
+    }
+
+    if(searchObject.followingOnly !== undefined){
+        var followingOnly = searchObject.followingOnly == "true"
+
+        if(followingOnly) {
+            // Loop over all users the user is following from the schemas following array.
+            var objectIds = []
+            
+            if(!req.session.user.following) {
+                req.session.user.following = []
+            }
+            req.session.user.following.forEach(user => {
+                objectIds.push(user)
+            })
+
+            objectIds.push(req.session.user._id)
+            searchObject.postedBy = { $in: objectIds }
+        }
+
+        delete searchObject.followingOnly
+    }
+
+    var results = await getPosts(searchObject)
+    res.status(200).send(results)
+})
+
+router.get("/start", async (req, res, next) => {
+
+    var searchObject = req.query
+
+    if(searchObject.isReply !== undefined) {
+        var isReply = searchObject.isReply == "true"
+        // Using the mongoDB operator to check if replyTo exist for the post.
+        searchObject.replyTo = { $exists: isReply }
+        delete searchObject.isReply
     }
 
     var results = await getPosts(searchObject)

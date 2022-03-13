@@ -14,9 +14,11 @@ $("#searchBox").keydown((event) => {
             $(".resultsContainer").html("");
         }
         else {
+            console.log(value)
+            console.log(searchType)
             search(value, searchType);
         }
-    }, 1000)
+    }, 2000)
 
 })
 

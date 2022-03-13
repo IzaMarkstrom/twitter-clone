@@ -17,8 +17,8 @@ router.get("/", async (req, res, next) => {
     if(req.query.search !== undefined) {
         searchObj = {
             $or: [
-                { firstName: { $regex: req.query.search, $options: "i" }},
-                { lastName: { $regex: req.query.search, $options: "i" }},
+                { firstname: { $regex: req.query.search, $options: "i" }},
+                { lastname: { $regex: req.query.search, $options: "i" }},
                 { username: { $regex: req.query.search, $options: "i" }},
             ]
         }

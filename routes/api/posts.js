@@ -22,7 +22,7 @@ router.get("/", async (req, res, next) => {
 
     // $options: "i" means that the search will not be case sensitive.
     if(searchObject.search !== undefined) {
-        searchObject.content = { $regex: searchObject.search, $options: "i" }
+        searchObject.textContent = { $regex: searchObject.search, $options: "i" }
         delete searchObject.search
     }
 

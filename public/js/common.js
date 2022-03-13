@@ -1,3 +1,6 @@
+// Global variable.
+var cropper
+
 // Function to enable and disabled the POST button. 
 $("#postTextarea, #replyTextarea").keyup(event => {
     var textbox = $(event.target)
@@ -68,6 +71,79 @@ $("#replyModal").on("hidden.bs.modal", () => {
     $("#originalPostContainer").html("")
 })
 
+$("#filePhoto").change(function() {    
+    // Making sure there is and array and that the first item is set.
+    if(this.files && this.files[0]) {
+        var reader = new FileReader()
+        reader.onload = (e) => {
+            var image = document.getElementById("imagePreview")
+            image.src = e.target.result
+
+            if(cropper !== undefined){
+                // Built in js function which will destroy the variable.
+                cropper.destroy()
+            }
+
+            cropper = new Cropper(image, {
+                aspectRatio: 1 / 1,
+                background: false
+            })
+        }
+        reader.readAsDataURL(this.files[0])
+    } else {
+        console.log("nope")
+    }
+})
+
+$("#imageUploadButton").click(() => {
+    var canvas = cropper.getCroppedCanvas();
+
+    if(canvas == null) {
+        alert("Could not upload image. Make sure it is an image file.");
+        return;
+    }
+
+    canvas.toBlob((blob) => {
+        var formData = new FormData();
+        formData.append("croppedImage", blob);
+
+        $.ajax({
+            url: "/api/users/profilePicture",
+            type: "POST",
+            data: formData,
+            // Forces JQuery to not make this into a String (since it is an image). 
+            processData: false,
+            contentType: false,
+            success: () => location.reload()
+        })
+    })
+})
+
+$(document).on("click", "#userUpdateButton", (event) => {
+    const firstName = $("#firstName").val().trim()
+    const lastName = $("#lastName").val().trim()
+    const username = $("#username").val().trim()
+    const email = $("#email").val().trim()
+    
+    $.ajax({
+        url: `/api/users/${profileUserId}`,
+        type: "PUT",
+        data: {
+            firstName,
+            lastName,
+            username,
+            email
+        },
+        success: (data, status, xhr) => {
+            if(xhr.status != 204) {
+                alert("Couldn't update information")
+            } else {
+                location.href = `/profile/${profileUserId}`
+            }
+        }
+    })
+})
+
 // Since the heart btn is dynamic content, it doesn't load until the page is ready.
 // Which means that the time this code execute, the btns are not on the page.
 $(document).on("click", ".likeBtn", (event) => {
@@ -126,6 +202,39 @@ $(document).on("click", ".post", (event) => {
     }
 })
 
+$(document).on("click", ".followButton", (event) => {
+    var button = $(event.target)
+    var userId = button.data().user
+
+    $.ajax({
+        url: `/api/users/${userId}/follow`, 
+        type: "PUT",
+        success: (data, status, xhr) => {
+            if(xhr.status == 404){
+                alert("User not found")
+                return 
+            }
+
+            var difference = 1;
+            if(data.following && data.following.includes(userId)) {
+                button.addClass("following");
+                button.text("Following");
+            }
+            else {
+                button.removeClass("following");
+                button.text("Follow");
+                difference = -1;
+            }
+            
+            var followersLabel = $("#followersValue");
+            if(followersLabel.length != 0) {
+                var followersText = followersLabel.text();
+                followersText = parseInt(followersText);
+                followersLabel.text(followersText + difference);
+            }
+        }
+    })
+})
 
 function getPostId(element) {
     var isRoot = element.hasClass("post")

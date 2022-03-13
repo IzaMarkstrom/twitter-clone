@@ -207,6 +207,10 @@ nav a.blue {
     margin-left: var(--spacing);
     position: absolute;
     bottom: -66px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .profileHeaderContainer .userImageContainer img{
@@ -232,7 +236,7 @@ nav a.blue {
 
 .profileButton:hover,
 .followButton:hover {
-background-color: var(--blueBackground);
+    background-color: var(--blueBackground);
 }
 
 .followButton.following {
@@ -305,4 +309,38 @@ background-color: var(--blueBackground);
 
 .replyFlag a {
     color: var(--blue);
+}
+
+.profilePictureButton {
+    position: absolute;
+    font-size: 50px;
+    color: rgba(0, 0, 0, 0.486);
+    display: none;
+}
+
+.userImageContainer:hover .profilePictureButton {
+    display: block;
+}
+
+#imagePreview {
+    width: 100%;
+    display: block;
+    max-width: 100%;
+}
+
+.userUpdateButton {
+    display: flex;
+}
+
+.userUpdateButton:hover {
+    color: var(--blue);
+}
+
+.modalBtn {
+    background-color: var(--blue);
+    border: none;
+}
+
+.modalBtn:hover {
+    background-color: #007bee;
 }
